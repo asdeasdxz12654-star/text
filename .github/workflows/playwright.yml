@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9, 3.10, 3.11]
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout
@@ -35,7 +36,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-browsers-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-playwright-browsers-${{ matrix.browser }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-playwright-browsers-
 
@@ -44,17 +45,37 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser
         run: |
-          python -m playwright install --with-deps
+          python -m playwright install ${{ matrix.browser }} --with-deps
 
       - name: Run tests and produce reports
+        env:
+          BROWSER: ${{ matrix.browser }}
         run: |
-          mkdir -p results
-          pytest -q --junitxml=results/junit.xml --html=results/report.html
+          mkdir -p results/screenshots
+          pytest -q --browser=${{ matrix.browser }} --junitxml=results/junit-${{ matrix.browser }}.xml --html=results/report-${{ matrix.browser }}.html || true
 
-      - name: Upload test results
+      - name: Upload junit/html results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: results
+          name: pytest-report-${{ matrix.browser }}
+          path: |
+            results/junit-${{ matrix.browser }}.xml
+            results/report-${{ matrix.browser }}.html
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.browser }}
+          path: results/screenshots
+
+      - name: Post test results to GitHub Checks
+        if: always() && exists('results/junit-${{ matrix.browser }}.xml')
+        uses: dorny/test-reporter@v1
+        with:
+          name: pytest-${{ matrix.browser }}
+          path: results/junit-${{ matrix.browser }}.xml
+          reporter: junit
