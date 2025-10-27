@@ -1,0 +1,6 @@
+# Directory for snapshot baselines
+tests/snapshots/
+
+# Temporary snapshot files
+*_current.png
+*_diff.png

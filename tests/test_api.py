@@ -22,9 +22,9 @@ def test_create_test_data(authenticated_api: APIClient):
         "title": f"Test {datetime.now().isoformat()}",
         "description": "Created by automated test"
     }
-    
+
     result = authenticated_api.create_test_data(**data)
     assert result["id"]
     assert result["title"] == data["title"]
-    
+
     # Cleanup happens automatically via authenticated_api fixture

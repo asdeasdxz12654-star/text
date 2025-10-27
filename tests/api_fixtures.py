@@ -28,10 +28,10 @@ def authenticated_api(api_client: APIClient) -> Generator[APIClient, None, None]
     """Get authenticated API client using test credentials."""
     username = os.environ.get("TEST_USERNAME", "test@example.com")
     password = os.environ.get("TEST_PASSWORD", "password123")
-    
+
     if not api_client.login(username, password):
         pytest.skip("Failed to authenticate with API")
-    
+
     try:
         yield api_client
     finally:

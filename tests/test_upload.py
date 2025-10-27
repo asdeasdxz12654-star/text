@@ -19,16 +19,16 @@ def test_file_upload(
     # Create a test file
     test_file = tmp_path / "test.txt"
     test_file.write_text("Test file content")
-    
+
     # Login and navigate to dashboard
     dashboard = login_page.login(
         os.environ.get("TEST_USERNAME", "test@example.com"),
         os.environ.get("TEST_PASSWORD", "password123")
     )
-    
+
     # Upload file and verify success
     dashboard.upload_file(str(test_file))
-    
+
     # Clean up
     test_file.unlink()
 
@@ -43,16 +43,16 @@ def test_large_file_upload(
     test_file = tmp_path / "large.bin"
     with open(test_file, "wb") as f:
         f.write(os.urandom(10 * 1024 * 1024))  # 10MB of random data
-    
+
     # Login and navigate to dashboard
     dashboard = login_page.login(
         os.environ.get("TEST_USERNAME", "test@example.com"),
         os.environ.get("TEST_PASSWORD", "password123")
     )
-    
+
     # Upload file and verify success (this may take longer)
     with pytest.raises(TimeoutError):
         dashboard.upload_file(str(test_file))
-    
+
     # Clean up
     test_file.unlink()

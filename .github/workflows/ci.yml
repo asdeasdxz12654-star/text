@@ -67,7 +67,10 @@ jobs:
           CI: "1"
         run: |
           mkdir -p reports || true
-          python -m pytest -q
+          # Run performance tests separately (they're sensitive to other tests running)
+          python -m pytest -m "performance" -v || true
+          # Run other tests
+          python -m pytest -m "not performance" -q
 
       - name: Upload test results
         if: always()
@@ -78,3 +81,5 @@ jobs:
             reports/
             test-results/
             playwright-report/
+            .benchmarks/
+            tests/snapshots/*_diff.png
