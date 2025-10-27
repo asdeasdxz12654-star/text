@@ -1,41 +1,81 @@
-# Playwright (Python) test scaffold
+# Playwright Python smoke test
 
-간단한 Playwright + pytest 테스트 자동화 스캐폴딩입니다.
+This repository contains a minimal Playwright + pytest setup in Python.
 
-설치 및 실행 (PowerShell):
+Quick start
+
+1. Create and activate a virtual environment (recommended).
+
+   PowerShell:
+
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   ```
+
+2. Install dependencies:
+
+   ```powershell
+   python -m pip install -r requirements.txt
+   ```
+
+3. Install Playwright browsers:
+
+   ```powershell
+   playwright install
+   # or for CI/debian-based: playwright install --with-deps
+   ```
+
+4. Run tests:
+
+   ```powershell
+   python -m pytest -q
+   ```
+
+Notes
+
+- Tests are under `tests/` and use the `page` fixture from `pytest-playwright`.
+- CI workflow is included at `.github/workflows/ci.yml` as an example.
+
+Windows / Troubleshooting
+
+- If `python --version` prints a path under `C:\Users\...\WindowsApps`, that is often the Microsoft Store stub. Install an official Python distribution from https://www.python.org/downloads/ (choose "Windows installer") then reopen your terminal.
+- If `python -m venv .venv` fails, verify you have the correct Python installer (the official installer adds the venv module). Re-run the installer and ensure "Add Python to PATH" is selected or use the full path to python.exe.
+- If you see `playwright: command not found`, use the module entrypoint:
 
 ```powershell
-# 1) 가상환경 생성
-python -m venv .venv
-
-# 2) 가상환경 활성화
-.\.venv\Scripts\Activate.ps1
-
-# 3) 의존성 설치
-pip install -r requirements.txt
-
-# 4) Playwright 브라우저 설치
 python -m playwright install
-
-# 5) 테스트 실행
-pytest -q
 ```
 
-파일 설명:
+CI notes
 
-- `requirements.txt` - 필요한 패키지 목록 (playwright, pytest, pytest-playwright)
-- `pytest.ini` - pytest 설정
-- `conftest.py` - 공통 fixture (예: `base_url`)
-- `tests/test_example.py` - 예제 테스트
-- `.gitignore` - 환경 파일 무시
+- The included GitHub Actions workflow (in `.github/workflows/ci.yml`) runs tests on Ubuntu with a small matrix for Python versions. It also caches pip and Playwright browser downloads to speed up runs.
+- Test results are written to `reports/junit.xml` and uploaded as a workflow artifact.
 
-주의:
+Next steps you may want me to do for you:
 
-- CI 환경에서는 브라우저 설치(`python -m playwright install`)를 스텝에 추가하세요.
-- 필요하면 `conftest.py`에서 `base_url`을 환경변수로 읽게 수정하세요.
+- Add more example tests (forms, login flows), and common helper fixtures (auth, test-data).
+- Add test report HTML generation (pytest-html) and upload the HTML as an artifact.
+- Configure Playwright to run against a local dev server by adding `BASE_URL` env var to CI.
 
-추가로 원하면 다음 작업을 도와드릴게요:
+Convenience scripts
 
-- GitHub Actions / Azure Pipelines용 CI 설정
-- 테스트 페이지 객체 패턴(PO) 템플릿
-- TypeScript/Node 기반 Playwright로의 전환 가이드
+Two helper PowerShell scripts are included in `scripts/` to simplify local setup and test runs on Windows:
+
+- `scripts/setup.ps1` — Creates a `.venv` virtual environment (if missing), installs Python requirements from `requirements.txt`, and runs `playwright install --with-deps` to download browser binaries.
+- `scripts/run-tests.ps1` — Ensures a `reports/` directory exists and runs `pytest` using the virtualenv python.
+
+Usage (PowerShell):
+
+```powershell
+# From the repo root
+.\scripts\setup.ps1
+.\scripts\run-tests.ps1
+```
+
+If you prefer to activate the venv manually, run:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m pytest -q
+```

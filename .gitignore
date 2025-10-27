@@ -1,8 +1,9 @@
-venv/
 .venv/
+venv/
 __pycache__/
 .pytest_cache/
-.playwright/
-*.pyc
-results/
-results/screenshots/
+*.py[cod]
+*.egg-info/
+.env
+.idea/
+.vscode/

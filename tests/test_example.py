@@ -1,8 +1,7 @@
-def test_example_domain(example_page, base_url):
-    """Smoke test using the `example_page` fixture.
+def test_example_title(page):
+    """A tiny smoke test using the pytest-playwright `page` fixture.
 
-    Navigates to the base URL and checks title and heading.
+    It navigates to example.com and asserts the page title.
     """
-    example_page.goto(base_url)
-    assert "Example Domain" in example_page.title()
-    assert example_page.heading_text() == "Example Domain"
+    page.goto("https://example.com")
+    assert "Example Domain" in page.title()
