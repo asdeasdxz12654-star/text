@@ -5,13 +5,30 @@ on:
     branches: [main, master]
   pull_request:
   workflow_dispatch:
+    inputs:
+      browser:
+        description: "Browser to test"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - webkit
+      headed:
+        description: "Run in headed mode"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python: [3.10, 3.11]
+        browser: ["chromium", "firefox", "webkit"]
     steps:
       - uses: actions/checkout@v4
 
@@ -41,9 +58,13 @@ jobs:
 
       - name: Install Playwright browsers
         run: |
-          python -m playwright install --with-deps
+          python -m playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run tests (pytest)
+        env:
+          BROWSER: ${{ matrix.browser }}
+          HEADED: ${{ github.event.inputs.headed || false }}
+          CI: "1"
         run: |
           mkdir -p reports || true
           python -m pytest -q
@@ -52,5 +73,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-junit
-          path: reports/junit.xml
+          name: test-results-${{ matrix.python }}-${{ matrix.browser }}
+          path: |
+            reports/
+            test-results/
+            playwright-report/
